@@ -57,7 +57,44 @@ matrix im2col(image im, int size, int stride)
     // TODO: 5.1
     // Fill in the column matrix with patches from the image
 
-
+    int c = im.c;
+    if(size%2!=0) {
+        for(i=0; i<im.w;i+=stride) {
+            for(j=0; j<im.h;j+=stride){
+                int index = 0;
+                for(k=0; k<c;k++) {
+                    for(int y=j-(size-1)/2; y<=j+(size-1)/2;y++) {
+                        for(int x=i-(size-1)/2; x<=i+(size-1)/2;x++) {
+                            if(x<0||y<0||x>=im.w||y>=im.h) {
+                                col.data[index*cols+i/stride+j*outw/stride] = 0;
+                            } else {
+                                col.data[index*cols+i/stride+j*outw/stride] = get_pixel(im,x,y,k);
+                            }
+                            index++;
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        for(i=0; i<im.w;i+=stride) {
+            for(j=0; j<im.h;j+=stride){
+                int index = 0;
+                for(k=0; k<c;k++) {
+                    for(int y=j; y<=j+size-1;y++) {
+                        for(int x=i; x<=i+size-1;x++) {
+                            if(x>=im.w||y>=im.h) {
+                                col.data[index*cols+i/stride+j*outw/stride] = 0;
+                            } else {
+                                col.data[index*cols+i/stride+j*outw/stride] = get_pixel(im,x,y,k);
+                            }
+                            index++;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     return col;
 }
@@ -78,7 +115,44 @@ image col2im(int width, int height, int channels, matrix col, int size, int stri
     // TODO: 5.2
     // Add values into image im from the column matrix
     
-
+     int c = im.c;
+    int outh = (im.h-1)/stride+1;
+    int cols = outw*outh;
+    if(size%2!=0) {
+        for(i=0; i<im.w;i+=stride) {
+            for(j=0; j<im.h;j+=stride){
+                int index = 0;
+                for(k=0; k<c;k++) {
+                    for(int y=j-(size-1)/2; y<=j+(size-1)/2;y++) {
+                        for(int x=i-(size-1)/2; x<=i+(size-1)/2;x++) {
+                            if(x<0||y<0||x>=im.w||y>=im.h) {
+                            } else {
+                                set_pixel(im,x,y,k,col.data[index*cols+i/stride+j*outw/stride]+get_pixel(im,x,y,k));
+                            }
+                            index++;
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        for(i=0; i<im.w;i+=stride) {
+            for(j=0; j<im.h;j+=stride){
+                int index = 0;
+                for(k=0; k<c;k++) {
+                    for(int y=j; y<=j+size-1;y++) {
+                        for(int x=i; x<=i+size-1;x++) {
+                            if(x>=im.w||y>=im.h) {
+                            } else {
+                                set_pixel(im,x,y,k,col.data[index*cols+i/stride+j*outw/stride]+get_pixel(im,x,y,k));
+                            }
+                            index++;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     return im;
 }
@@ -172,6 +246,11 @@ matrix backward_convolutional_layer(layer l, matrix dy)
 void update_convolutional_layer(layer l, float rate, float momentum, float decay)
 {
     // TODO: 5.3
+    axpy_matrix(decay, l.w, l.dw);
+    axpy_matrix(-rate, l.dw, l.w);
+    scal_matrix(momentum, l.dw);
+    axpy_matrix(-rate, l.db, l.b);
+    scal_matrix(momentum, l.db);
 }
 
 // Make a new convolutional layer
