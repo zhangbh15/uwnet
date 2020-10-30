@@ -5,8 +5,9 @@
 #include "uwnet.h"
 
 // Add bias terms to a matrix
-// matrix m: partially computed output of layer
+// matrix xw: partially computed output of layer
 // matrix b: bias to add in (should only be one row!)
+// returns: y = wx + b
 matrix forward_convolutional_bias(matrix xw, matrix b)
 {
     assert(b.rows == 1);
@@ -23,9 +24,9 @@ matrix forward_convolutional_bias(matrix xw, matrix b)
     return y;
 }
 
-// Calculate bias updates from a delta matrix
-// matrix delta: error made by the layer
-// matrix db: delta for the biases
+// Calculate dL/db from a dL/dy
+// matrix dy: derivative of loss wrt xw+b, dL/d(xw+b)
+// returns: derivative of loss wrt b, dL/db
 matrix backward_convolutional_bias(matrix dy, int n)
 {
     assert(dy.cols % n == 0);
@@ -53,10 +54,8 @@ matrix im2col(image im, int size, int stride)
     int rows = im.c*size*size;
     int cols = outw * outh;
     matrix col = make_matrix(rows, cols);
-
     // TODO: 5.1
     // Fill in the column matrix with patches from the image
-
     int c = im.c;
     if(size%2!=0) {
         for(i=0; i<im.w;i+=stride) {
@@ -95,7 +94,6 @@ matrix im2col(image im, int size, int stride)
             }
         }
     }
-
     return col;
 }
 
@@ -114,8 +112,7 @@ image col2im(int width, int height, int channels, matrix col, int size, int stri
 
     // TODO: 5.2
     // Add values into image im from the column matrix
-    
-     int c = im.c;
+    int c = im.c;
     int outh = (im.h-1)/stride+1;
     int cols = outw*outh;
     if(size%2!=0) {
@@ -153,7 +150,6 @@ image col2im(int width, int height, int channels, matrix col, int size, int stri
             }
         }
     }
-
     return im;
 }
 
@@ -191,7 +187,8 @@ matrix forward_convolutional_layer(layer l, matrix in)
 
 // Run a convolutional layer backward
 // layer l: layer to run
-// matrix dy: derivative of loss wrt output dL/dy
+// matrix dy: dL/dy for this layer
+// returns: dL/dx for this layer
 matrix backward_convolutional_layer(layer l, matrix dy)
 {
     matrix in = *l.x;

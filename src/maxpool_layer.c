@@ -20,8 +20,44 @@ matrix forward_maxpool_layer(layer l, matrix in)
     int outh = (l.height-1)/l.stride + 1;
     matrix out = make_matrix(in.rows, outw*outh*l.channels);
 
+
     // TODO: 6.1 - iterate over the input and fill in the output with max values
 
+    int c = l.channels;
+    int size = l.size;
+    int stride = l.stride;
+    for(int r=0; r<in.rows;r++) {
+        for(int k=0; k<c;k++) {
+            for(int i=0; i<l.height; i+=stride) {
+                for(int j=0; j<l.width; j+=stride) {
+                    float max = -100.0;
+                    if(size%2==0) {
+                        for(int y=i; y<=i+size-1; y++) {
+                            for(int x=j; x<=j+size-1; x++) {
+                                int index = r*in.cols+k*l.width*l.height+y*l.width+x;
+                                if(x<0||y<0||x>l.width||y>l.height) {
+                                }else {
+                                    max = max>in.data[index]? max:in.data[index];
+
+                                }
+                            }
+                        }
+                    } else {
+                        for(int y=i-(size-1)/2; y<=i+(size-1)/2; y++) {
+                            for(int x=j-(size-1)/2; x<=j+(size-1)/2; x++) {
+                                int index = r*in.cols+k*l.width*l.height+y*l.width+x;
+                                if(x<0||y<0||x>l.width||y>l.height) {
+                                }else {
+                                    max = max>in.data[index]? max:in.data[index];
+                                }
+                            }
+                        }
+                    }
+                    out.data[r*out.cols+k*outw*outh+i*outw/stride+j/stride]=max;
+                }
+            }
+        }
+    }
 
 
     return out;
@@ -29,10 +65,10 @@ matrix forward_maxpool_layer(layer l, matrix in)
 
 // Run a maxpool layer backward
 // layer l: layer to run
-// matrix prev_delta: error term for the previous layer
+// matrix dy: error term for the previous layer
 matrix backward_maxpool_layer(layer l, matrix dy)
 {
-    matrix in    = *l.x;
+    matrix in = *l.x;
     matrix dx = make_matrix(dy.rows, l.width*l.height*l.channels);
 
     int outw = (l.width-1)/l.stride + 1;
@@ -40,9 +76,51 @@ matrix backward_maxpool_layer(layer l, matrix dy)
     // TODO: 6.2 - find the max values in the input again and fill in the
     // corresponding delta with the delta from the output. This should be
     // similar to the forward method in structure.
-
-
-
+    int c = l.channels;
+    int size = l.size;
+    int stride = l.stride;
+    for(int r=0; r<in.rows;r++) {
+        for(int k=0; k<c;k++) {
+            for(int i=0; i<l.height; i+=stride) {
+                for(int j=0; j<l.width; j+=stride) {
+                    float max = -100.0;
+                    int maxX = j;
+                    int maxY = i;
+                    if(size%2==0) {
+                        for(int y=i; y<=i+size-1; y++) {
+                            for(int x=j; x<=j+size-1; x++) {
+                                int index = r*in.cols+k*l.width*l.height+y*l.width+x;
+                                if(x<0||y<0||x>l.width||y>l.height) {
+                                }else {
+                                    if(max<in.data[index]) {
+                                        max = in.data[index];
+                                        maxX = x;
+                                        maxY = y;
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        for(int y=i-(size-1)/2; y<=i+(size-1)/2; y++) {
+                            for(int x=j-(size-1)/2; x<=j+(size-1)/2; x++) {
+                                int index = r*in.cols+k*l.width*l.height+y*l.width+x;
+                                if(x<0||y<0||x>l.width||y>l.height) {
+                                }else {
+                                    if(max<in.data[index]) {
+                                        max = in.data[index];
+                                        maxX = x;
+                                        maxY = y;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    dx.data[r*dx.cols+k*l.width*l.height+maxY*l.width+maxX] +=
+                    dy.data[r*dy.cols+k*outw*outh+i*outw/stride+j/stride];
+                }
+            }
+        }
+    }
     return dx;
 }
 
@@ -70,4 +148,9 @@ layer make_maxpool_layer(int w, int h, int c, int size, int stride)
     l.update   = update_maxpool_layer;
     return l;
 }
+
+//float max(float a, float b) {
+//    return a>b ? a : b;
+//}
+
 
