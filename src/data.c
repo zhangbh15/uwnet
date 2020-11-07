@@ -131,6 +131,3 @@ void free_data(data d)
     free_matrix(d.x);
     free_matrix(d.y);
 }
-
-
-

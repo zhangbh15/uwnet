@@ -279,6 +279,8 @@ void test_maxpool_layer()
     matrix truth_max_y = load_matrix("data/test/max_y.matrix");
     matrix truth_max_y3 = load_matrix("data/test/max_y3.matrix");
 
+
+
     TEST(same_matrix(truth_max_y, max_y));
     TEST(same_matrix(truth_max_y3, max_y3));
 
@@ -290,6 +292,7 @@ void test_maxpool_layer()
 
     matrix truth_max_dx = load_matrix("data/test/max_dx.matrix");
     matrix truth_max_dx3 = load_matrix("data/test/max_dx3.matrix");
+
 
     TEST(same_matrix(truth_max_dx, max_dx));
     TEST(same_matrix(truth_max_dx3, max_dx3));
