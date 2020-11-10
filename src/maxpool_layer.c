@@ -152,3 +152,5 @@ layer make_maxpool_layer(int w, int h, int c, int size, int stride)
 //float max(float a, float b) {
 //    return a>b ? a : b;
 //}
+
+
