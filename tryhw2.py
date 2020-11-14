@@ -54,9 +54,12 @@ print("evaluating model...")
 print("training accuracy: %f", accuracy_net(m, train))
 print("test accuracy:     %f", accuracy_net(m, test))
 
-# How accurate is the fully connected network vs the convnet when they use similar number of operations?
-# Why are you seeing these results? Speculate based on the information you've gathered and what you know about DL and ML.
-# Your answer:
+
+
+# 7.6 Question: What do you notice about training the convnet with/without batch normalization? How does it affect convergence? How does it affect what magnitude of learning rate you can use? Write down any observations from your experiments:
+# TODO: Your answer
+# With the same parameters, batch normalization makes convergence faster and makes the final accuracy higher. 
+# I can also use larger learning rates with batch normalization.
 
 # The original model gives an training accuracy of 0.4065600037574768 and a test accuracy of 0.4025000035762787. 
 # When added batch norm after eac layer, the training accuracy is 0.5467399954795837, the test accuracy is 0.5388000011444092.
